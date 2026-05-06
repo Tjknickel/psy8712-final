@@ -12,7 +12,6 @@ library(stm)
 library(jsonlite)
 
 # Post an API request to Ollama to access the Ollama endpoint to use the nomic-embed-text LLM embeddings model
-
 get_embeddings <- function(text) {
   response <- POST(
     url = "http://localhost:11434/api/embed",
@@ -27,4 +26,7 @@ get_embeddings <- function(text) {
   }
   return(httr::content(response)$embeddings[[1]])
 }
-
+# Load the datafile and create reviews_tbl, a dataframe with two columns, overall_rating and all_text  
+reviews_tbl <- read_csv("../data/glassdoor_reviews.csv") %>%
+  mutate(all_text = paste(headline, pros, cons, sep = " ")) %>%
+  select(overall_rating, all_text)
