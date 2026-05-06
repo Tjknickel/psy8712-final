@@ -4,5 +4,27 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
 library(rvest)
 library(httr)
+library(tm)
+library(textclean)
+library(textstem)
+library(caret)
+library(stm)
+library(jsonlite)
 
-# Read in the csv file 
+# Post an API request to Ollama to access the Ollama endpoint to use the nomic-embed-text LLM embeddings model
+
+get_embeddings <- function(text) {
+  response <- POST(
+    url = "http://localhost:11434/api/embed",
+    body = list(
+      model = "nomic-embed-text", 
+      input = text),
+    encode = "json"
+  )
+  if (status_code(response) != 200) {
+    warning("Request failed with status: ", status_code(response))
+    return(rep(NA_real_, 768))
+  }
+  return(httr::content(response)$embeddings[[1]])
+}
+
