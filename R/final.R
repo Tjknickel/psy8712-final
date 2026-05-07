@@ -30,3 +30,18 @@ get_embeddings <- function(text) {
 reviews_tbl <- read_csv("../data/glassdoor_reviews.csv") %>%
   mutate(all_text = paste(headline, pros, cons, sep = " ")) %>%
   select(overall_rating, all_text)
+# Create a corpus 
+corpus <- VCorpus(VectorSource(reviews_tbl$all_text))
+
+corpus_prep <- corpus %>%
+  tm_map(content_transformer(function(x) str_remove_all(x, "(?<=\\b[A-Z])\\.(?=[A-Z]\\b)"))) %>%
+  tm_map(content_transformer(replace_contraction)) %>%
+  tm_map(content_transformer(str_to_lower)) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(content_transformer(lemmatize_strings)) %>%
+  tm_map(removeWords, c(
+    "company", "job", "work", "place", "glassdoor",
+    stopwords("en")
+  )) %>%
+  tm_map(stripWhitespace)
